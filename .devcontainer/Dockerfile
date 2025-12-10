@@ -8,7 +8,13 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install bazelisk (latest release)
-RUN curl -L https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
+RUN ARCH=$(dpkg --print-architecture) \
+    && case "$ARCH" in \
+      amd64) URL="https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64" ;; \
+      arm64) URL="https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-arm64" ;; \
+      *) echo "Unsupported architecture: $ARCH"; exit 1 ;; \
+    esac \
+    && curl -L "$URL" \
       -o /usr/local/bin/bazelisk \
     && chmod +x /usr/local/bin/bazelisk \
     && ln -s /usr/local/bin/bazelisk /usr/local/bin/bazel
